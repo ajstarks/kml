@@ -1,7 +1,7 @@
 # KML
 
 Convert KML files to deck markup
-
+P
 ![kml-example](us-states.png)
 
 ```./kml -linewidth=0.075 -bbox=blue < cb_2018_us_states_5m.kml | pdfdeck -stdout - > states.pdf```
@@ -22,7 +22,7 @@ Convert KML files to deck markup
   -latmin float
     	latitude x minimum (default 24)
   -linewidth float
-    	linewidth (default 0.1)
+    	longitude y maximum (default 0.1)
   -longmax float
     	longitude y maximum (default -67)
   -longmin float
