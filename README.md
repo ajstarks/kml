@@ -4,7 +4,7 @@ Convert KML files to deck markup
 
 ![kml-example](us-states.png)
 
-![kml-counties](us-county.png)
+![kml-counties](us-counties.png)
 
 ## options
 ```
