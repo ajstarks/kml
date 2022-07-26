@@ -22,7 +22,7 @@ P
   -latmin float
     	latitude x minimum (default 24)
   -linewidth float
-    	longitude y maximum (default 0.1)
+    	linewidth (default 0.1)
   -longmax float
     	longitude y maximum (default -67)
   -longmin float
