@@ -219,7 +219,7 @@ func main() {
 	flag.Float64Var(&mapgeo.latmax, "latmax", 50, "latitude x maxmum")
 	flag.Float64Var(&mapgeo.longmin, "longmin", -125, "longitude y minimum")
 	flag.Float64Var(&mapgeo.longmax, "longmax", -67, "longitude y maximum")
-	flag.Float64Var(&linewidth, "linewidth", 0.1, "longitude y maximum")
+	flag.Float64Var(&linewidth, "linewidth", 0.1, "line width")
 	flag.StringVar(&color, "color", "black", "line color")
 	flag.StringVar(&bbox, "bbox", "", "bounding box")
 	flag.BoolVar(&fulldeck, "fulldeck", true, "make a full deck")
