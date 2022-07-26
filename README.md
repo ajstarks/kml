@@ -4,8 +4,11 @@ Convert KML files to deck markup
 
 ![kml-example](us-states.png)
 
+```./kml -linewidth=0.075 -bbox=blue < cb_2018_us_states_5m.kml | pdfdeck -stdout - > states.pdf```
+
 ![kml-counties](us-counties.png)
 
+```/kml -linewidth=0.075 -bbox=blue < cb_2018_us_county_20m.kml | pdfdeck -stdout - > counties.pdf```
 ## options
 ```
   -bbox string
