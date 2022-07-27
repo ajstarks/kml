@@ -1,14 +1,14 @@
 # KML
 
 Convert KML files to deck markup
-P
+
 ![kml-example](us-states.png)
 
 ```./kml -linewidth=0.075 -bbox=blue < cb_2018_us_states_5m.kml | pdfdeck -stdout - > states.pdf```
 
 ![kml-counties](us-counties.png)
 
-```/kml -linewidth=0.075 -bbox=blue < cb_2018_us_county_20m.kml | pdfdeck -stdout - > counties.pdf```
+```./kml -linewidth=0.075 -bbox=blue < cb_2018_us_county_20m.kml | pdfdeck -stdout - > counties.pdf```
 ## options
 ```
   -bbox string
@@ -37,3 +37,5 @@ P
     	canvas y minimum (default 10)
 
 ```
+
+The data in the repository is from the [US Census](https://www.census.gov/geographies/mapping-files/time-series/geo/kml-cartographic-boundary-files.html)

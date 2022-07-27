@@ -246,8 +246,8 @@ func main() {
 		deckpolyline(px, py, linewidth, color)
 		mpolys := pms.MultiGeometry.Polygon // multiple polygons
 		for _, p := range mpolys {
-			x, y := parseCoords(p.OuterBoundaryIs.LinearRing.Coordinates, mapgeo)
-			deckpolyline(x, y, linewidth, color)
+			mx, my := parseCoords(p.OuterBoundaryIs.LinearRing.Coordinates, mapgeo)
+			deckpolyline(mx, my, linewidth, color)
 		}
 	}
 
