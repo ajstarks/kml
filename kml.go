@@ -164,9 +164,9 @@ func vmap(value float64, low1 float64, high1 float64, low2 float64, high2 float6
 }
 
 // poly makes decksh markup for a polygon or polyline given x, y slices
-func poly(object string, x, y []float64, lw float64, color string) {
+func poly(name string, x, y []float64, lw float64, color string) {
 	style := fmt.Sprintf("%.2f %s", lw, color)
-	fmt.Printf("%s \"%.3f", object, x[0])
+	fmt.Printf("%s \"%.3f", name, x[0])
 	for i := 1; i < len(x); i++ {
 		fmt.Printf(" %.3f", x[i])
 	}
@@ -210,8 +210,9 @@ func deckpolygon(x, y []float64, lw float64, color string) {
 	fmt.Printf(" %.3f\"/>\n", y[end])
 }
 
-func deckshape(object string, x, y []float64, lw float64, color string) {
-	switch object {
+// deckshape makes either a set of polylines or polygons given a slice of coordinates
+func deckshape(name string, x, y []float64, lw float64, color string) {
+	switch name {
 	case "polyline", "line":
 		deckpolyline(x, y, lw, color)
 	case "polygon", "fill":
@@ -221,16 +222,30 @@ func deckshape(object string, x, y []float64, lw float64, color string) {
 	}
 }
 
+// deckbegin begins a deck
+func deckbegin(bgcolor string) {
+	if bgcolor == "" {
+		fmt.Printf("<deck><slide>")
+	} else {
+		fmt.Printf("<deck><slide bg=\"%s\">", bgcolor)
+	}
+}
+
+// deckend ends a deck
+func deckend() {
+	fmt.Printf("</slide></deck>")
+}
+
 // boundingBox makes a lat/long bounding box, labeled at the corners
 func boundingBox(g geometry, color string) {
 	w := g.xmax - g.xmin
 	h := g.ymax - g.ymin
 	x := g.xmin + (w / 2)
 	y := g.ymin + (h / 2)
-	fmt.Printf(textfmt, g.xmax, g.ymax, g.longmax, g.latmax)
-	fmt.Printf(textfmt, g.xmin, g.ymin, g.longmin, g.latmin)
-	fmt.Printf(textfmt, g.xmin, g.ymax, g.longmin, g.latmax)
-	fmt.Printf(textfmt, g.xmax, g.ymin, g.longmax, g.latmin)
+	fmt.Printf(textfmt, g.xmin, g.ymin, g.longmin, g.latmin) // lower left
+	fmt.Printf(textfmt, g.xmax, g.ymin, g.longmax, g.latmin) // lower right
+	fmt.Printf(textfmt, g.xmax, g.ymax, g.longmax, g.latmax) // upper right
+	fmt.Printf(textfmt, g.xmin, g.ymax, g.longmin, g.latmax) // upper right
 	fmt.Printf(rectfmt, x, y, w, h, color)
 }
 
@@ -239,7 +254,7 @@ func main() {
 	var mapgeo geometry
 	var fulldeck bool
 	var linewidth float64
-	var color, bbox, shape string
+	var color, bbox, shape, bgcolor string
 
 	// options
 	flag.Float64Var(&mapgeo.xmin, "xmin", 5, "canvas x minimum")
@@ -254,6 +269,7 @@ func main() {
 	flag.StringVar(&color, "color", "black", "line color")
 	flag.StringVar(&bbox, "bbox", "", "bounding box color (\"\" no box)")
 	flag.StringVar(&shape, "shape", "polyline", "polygon or polyline")
+	flag.StringVar(&bgcolor, "bgcolor", "", "background color")
 	flag.BoolVar(&fulldeck, "fulldeck", true, "make a full deck")
 	flag.Parse()
 
@@ -265,13 +281,12 @@ func main() {
 	}
 	// add deck/slide markup, if specified
 	if fulldeck {
-		fmt.Println("<deck><slide>")
+		deckbegin(bgcolor)
 	}
 	// make a bounding box, if specified
 	if len(bbox) > 0 {
 		boundingBox(mapgeo, bbox)
 	}
-
 	// for every placemark, get the coordinates of the polygons
 	for _, pms := range data.Document.Folder.Placemark {
 		px, py := parseCoords(pms.Polygon.OuterBoundaryIs.LinearRing.Coordinates, mapgeo) // single polygons
@@ -282,9 +297,8 @@ func main() {
 			deckshape(shape, mx, my, linewidth, color)
 		}
 	}
-
 	// end the deck, if specified
 	if fulldeck {
-		fmt.Println("</slide></deck>")
+		deckend()
 	}
 }
