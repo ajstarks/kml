@@ -163,10 +163,10 @@ func vmap(value float64, low1 float64, high1 float64, low2 float64, high2 float6
 	return low2 + (high2-low2)*(value-low1)/(high1-low1)
 }
 
-// polyline makes decksh markup for a polyline given x, y slices
-func polyline(x, y []float64, lw float64, color string) {
+// poly makes decksh markup for a polygon or polyline given x, y slices
+func poly(object string, x, y []float64, lw float64, color string) {
 	style := fmt.Sprintf("%.2f %s", lw, color)
-	fmt.Printf("polyline \"%.3f", x[0])
+	fmt.Printf("%s \"%.3f", object, x[0])
 	for i := 1; i < len(x); i++ {
 		fmt.Printf(" %.3f", x[i])
 	}
@@ -179,7 +179,7 @@ func polyline(x, y []float64, lw float64, color string) {
 	fmt.Printf(" %.3f\" %s\n", y[len(y)-1], style)
 }
 
-// deckpolyline makes deck markup for a ployline given x, y slices
+// deckpolyline makes deck markup for a ployline given x, y coordinate slices
 func deckpolyline(x, y []float64, lw float64, color string) {
 	lx := len(x)
 	if lx < 2 {
@@ -191,6 +191,37 @@ func deckpolyline(x, y []float64, lw float64, color string) {
 	fmt.Printf(linefmt, x[0], y[0], x[lx-1], y[lx-1], lw, color)
 }
 
+// deckpolygon makes deck markup for a polygon given x, y coordinates slices
+func deckpolygon(x, y []float64, lw float64, color string) {
+	nc := len(x)
+	if nc < 3 || nc != len(y) {
+		return
+	}
+	end := nc - 1
+	fmt.Printf("<polygon color=\"%s\" xc=\"%.3f", color, x[0])
+	for i := 1; i < nc; i++ {
+		fmt.Printf(" %.3f", x[i])
+	}
+	fmt.Printf(" %.3f\" ", x[end])
+	fmt.Printf("yc=\"%.3f", y[0])
+	for i := 1; i < nc; i++ {
+		fmt.Printf(" %.3f", y[i])
+	}
+	fmt.Printf(" %.3f\"/>\n", y[end])
+}
+
+func deckshape(object string, x, y []float64, lw float64, color string) {
+	switch object {
+	case "polyline", "line":
+		deckpolyline(x, y, lw, color)
+	case "polygon", "fill":
+		deckpolygon(x, y, lw, color)
+	default:
+		deckpolyline(x, y, lw, color)
+	}
+}
+
+// boundingBox makes a lat/long bounding box, labeled at the corners
 func boundingBox(g geometry, color string) {
 	w := g.xmax - g.xmin
 	h := g.ymax - g.ymin
@@ -208,7 +239,7 @@ func main() {
 	var mapgeo geometry
 	var fulldeck bool
 	var linewidth float64
-	var color, bbox string
+	var color, bbox, shape string
 
 	// options
 	flag.Float64Var(&mapgeo.xmin, "xmin", 5, "canvas x minimum")
@@ -221,7 +252,8 @@ func main() {
 	flag.Float64Var(&mapgeo.longmax, "longmax", -67, "longitude y maximum")
 	flag.Float64Var(&linewidth, "linewidth", 0.1, "line width")
 	flag.StringVar(&color, "color", "black", "line color")
-	flag.StringVar(&bbox, "bbox", "", "bounding box")
+	flag.StringVar(&bbox, "bbox", "", "bounding box color (\"\" no box)")
+	flag.StringVar(&shape, "shape", "polyline", "polygon or polyline")
 	flag.BoolVar(&fulldeck, "fulldeck", true, "make a full deck")
 	flag.Parse()
 
@@ -231,11 +263,11 @@ func main() {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
 		os.Exit(1)
 	}
-
 	// add deck/slide markup, if specified
 	if fulldeck {
 		fmt.Println("<deck><slide>")
 	}
+	// make a bounding box, if specified
 	if len(bbox) > 0 {
 		boundingBox(mapgeo, bbox)
 	}
@@ -243,11 +275,11 @@ func main() {
 	// for every placemark, get the coordinates of the polygons
 	for _, pms := range data.Document.Folder.Placemark {
 		px, py := parseCoords(pms.Polygon.OuterBoundaryIs.LinearRing.Coordinates, mapgeo) // single polygons
-		deckpolyline(px, py, linewidth, color)
+		deckshape(shape, px, py, linewidth, color)
 		mpolys := pms.MultiGeometry.Polygon // multiple polygons
 		for _, p := range mpolys {
 			mx, my := parseCoords(p.OuterBoundaryIs.LinearRing.Coordinates, mapgeo)
-			deckpolyline(mx, my, linewidth, color)
+			deckshape(shape, mx, my, linewidth, color)
 		}
 	}
 
