@@ -30,6 +30,10 @@ There are two example clients:
 
 ```./world  -shape=fill -bgcolor=lightblue -color=brown world.kml | pdfdeck -stdout  -pagesize 1600x1000 - > world.pdf```
 
+![kml-zoom](slave-route.png)
+
+```./world -latmin=-20 -latmax=35 -longmin=-100 -longmax=20 -shape=fill -bgcolor=lightsteelblue -color=sienna world.kml | pdfdeck -stdout -pagesize 1600x900 - > slave-route.pdf```
+
 ### options
 ```
   -bbox string
@@ -46,8 +50,7 @@ There are two example clients:
       latitude x minimum (default -90)
   -linewidth float
       line width (default 0.1)
-  -longmax floatworldoutline.pdf
-
+  -longmax float
       longitude y maximum (default 180)
   -longmin float
       longitude y minimum (default -180)
@@ -63,7 +66,7 @@ There are two example clients:
       canvas y minimum (default 5)
 ```
 
-The included file are from [opendatasoft site](https://public.opendatasoft.com/explore/dataset/world-administrative-boundaries/export/)
+The included KML files are from the [opendatasoft site](https://public.opendatasoft.com/explore/dataset/world-administrative-boundaries/export/)
 
 ### USMAP
 
