@@ -7,24 +7,24 @@ Convert KML files to deck markup
 The package has these functions:
 
 *  ParseCoords(s string, g Geometry) ([]float64, []float64)
-*  Poly(name string, x, y []float64, lw float64, color string)
-*  Deckpolyline(x, y []float64, lw float64, color string)
-*  Deckpolygon(x, y []float64, lw float64, color string)
-*  Deckshape(name string, x, y []float64, lw float64, color string)
+*  Deckpolygon(x, y []float64, color string, g Geometry)
+*  Deckshpolygon(x, y []float64, color string, g Geometry)
+*  Deckpolyline(x, y []float64, lw float64, color string, g Geometry)
+*  Deckshpolyline(x, y []float64, lw float64, color string, g Geometry)
+*  Deckshape(name string, x, y []float64, lw float64, color string, g Geometry)
 *  Deckbegin(bgcolor string)
 *  Deckend()
 *  BoundingBox(g Geometry, color string)
 
+
 The package assumes the calling main package will parse the KML files, extracting coordinates
 There are two example clients:
 
-## Commands
-
-### World
+## World
 
 ![kml-world-outline](worldoutline.png)
 
-```/world world.kml|  pdfdeck -stdout  -pagesize 1600x1000 - > worldoutline.pdf```
+```./world world.kml | pdfdeck -stdout  -pagesize 1600x1000 - > worldoutline.pdf```
 
 ![kml-world](world.png)
 
@@ -68,11 +68,11 @@ There are two example clients:
 
 The included KML files are from the [opendatasoft site](https://public.opendatasoft.com/explore/dataset/world-administrative-boundaries/export/)
 
-### USMAP
+## USMAP
 
 ![kml-example](us-states.png)
 
-```./usmap -linewidth=0.075 -bbox=blue < cb_2018_us_states_5m.kml | pdfdeck -stdout - > states.pdf```
+```./usmap -linewidth=0.075 -bbox=blue < cb_2018_us_state_5m.kml | pdfdeck -stdout - > states.pdf```
 
 ![kml-counties](us-counties.png)
 
@@ -80,7 +80,7 @@ The included KML files are from the [opendatasoft site](https://public.opendatas
 
 ![kml-filled](filled.png)
 
-```./usmap -color "hsv(240,100,30)" -bbox blue  -shape fill  < cb_2018_us_nation_20m.kml | pdfdeck - > nation.pdf```
+```./usmap -color "hsv(240,100,30)" -bbox blue  -shape fill  < cb_2018_us_nation_20m.kml | pdfdeck -stdout - > nation.pdf```
 
 ### options
 ```
