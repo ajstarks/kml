@@ -126,12 +126,32 @@ func readData(r io.Reader) (Kml, error) {
 	return data, err
 }
 
+// begin begins a deck or decksh document
+func begin(style, color string) {
+	switch style {
+	case "deck":
+		kml.Deckbegin(color)
+	case "decksh":
+		kml.Deckshbegin(color)
+	}
+}
+
+// end ends a deck or decksh document
+func end(style string) {
+	switch style {
+	case "deck":
+		kml.Deckend()
+	case "decksh":
+		kml.Deckshend()
+	}
+}
+
 func main() {
 
 	var mapgeo kml.Geometry
 	var fulldeck bool
 	var linewidth float64
-	var color, bbox, shape, bgcolor string
+	var color, bbox, shape, style, bgcolor string
 
 	// options
 	flag.Float64Var(&mapgeo.Xmin, "xmin", 5, "canvas x minimum")
@@ -146,6 +166,7 @@ func main() {
 	flag.StringVar(&color, "color", "black", "line color")
 	flag.StringVar(&bbox, "bbox", "", "bounding box color (\"\" no box)")
 	flag.StringVar(&shape, "shape", "polyline", "polygon or polyline")
+	flag.StringVar(&style, "style", "deck", "deck, decksh, or plain")
 	flag.StringVar(&bgcolor, "bgcolor", "", "background color")
 	flag.BoolVar(&fulldeck, "fulldeck", true, "make a full deck")
 	flag.Parse()
@@ -158,24 +179,24 @@ func main() {
 	}
 	// add deck/slide markup, if specified
 	if fulldeck {
-		kml.Deckbegin(bgcolor)
+		begin(bgcolor, style)
 	}
 	// make a bounding box, if specified
 	if len(bbox) > 0 {
-		kml.BoundingBox(mapgeo, bbox)
+		kml.BoundingBox(mapgeo, bbox, style)
 	}
 	// for every placemark, get the coordinates of the polygons
 	for _, pms := range data.Document.Folder.Placemark {
 		px, py := kml.ParseCoords(pms.Polygon.OuterBoundaryIs.LinearRing.Coordinates, mapgeo) // single polygons
-		kml.Deckshape(shape, px, py, linewidth, color)
+		kml.Deckshape(shape, style, px, py, linewidth, color, mapgeo)
 		mpolys := pms.MultiGeometry.Polygon // multiple polygons
 		for _, p := range mpolys {
 			mx, my := kml.ParseCoords(p.OuterBoundaryIs.LinearRing.Coordinates, mapgeo)
-			kml.Deckshape(shape, mx, my, linewidth, color)
+			kml.Deckshape(shape, style, mx, my, linewidth, color, mapgeo)
 		}
 	}
 	// end the deck, if specified
 	if fulldeck {
-		kml.Deckend()
+		end(style)
 	}
 }

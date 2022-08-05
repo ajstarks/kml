@@ -94,12 +94,60 @@ func readData(filename string) (Kml, error) {
 	return data, err
 }
 
+// kmldeck makes deck or decksh markup from coordinates
+func kmldeck(data Kml, m kml.Geometry, linewidth float64, color, shape, style string) {
+	// for every placemark, get the coordinates of the polygons
+	for _, pms := range data.Document.Placemark {
+		px, py := kml.ParseCoords(pms.Polygon.OuterBoundaryIs.LinearRing.Coordinates, m) // single polygons
+		kml.Deckshape(shape, style, px, py, linewidth, color, m)
+		mpolys := pms.MultiGeometry.Polygon // multiple polygons
+		for _, p := range mpolys {
+			mx, my := kml.ParseCoords(p.OuterBoundaryIs.LinearRing.Coordinates, m)
+			kml.Deckshape(shape, style, mx, my, linewidth, color, m)
+		}
+	}
+}
+
+// kmldump prints coordinates contained in a KML document
+func kmldump(data Kml) {
+	// for every placemark, get the coordinates of the polygons
+	for _, pms := range data.Document.Placemark {
+		px, py := kml.ParsePlainCoords(pms.Polygon.OuterBoundaryIs.LinearRing.Coordinates) // single polygons
+		kml.DumpCoords(px, py)
+		mpolys := pms.MultiGeometry.Polygon // multiple polygons
+		for _, p := range mpolys {
+			mx, my := kml.ParsePlainCoords(p.OuterBoundaryIs.LinearRing.Coordinates)
+			kml.DumpCoords(mx, my)
+		}
+	}
+}
+
+// begin begins a deck or decksh document
+func begin(style, color string) {
+	switch style {
+	case "deck":
+		kml.Deckbegin(color)
+	case "decksh":
+		kml.Deckshbegin(color)
+	}
+}
+
+// end ends a deck or decksh document
+func end(style string) {
+	switch style {
+	case "deck":
+		kml.Deckend()
+	case "decksh":
+		kml.Deckshend()
+	}
+}
+
 func main() {
 
 	var mapgeo kml.Geometry
 	var fulldeck bool
 	var linewidth float64
-	var color, bbox, shape, bgcolor string
+	var color, bbox, shape, bgcolor, style string
 
 	// options
 	flag.Float64Var(&mapgeo.Xmin, "xmin", 5, "canvas x minimum")
@@ -113,14 +161,15 @@ func main() {
 	flag.Float64Var(&linewidth, "linewidth", 0.1, "line width")
 	flag.StringVar(&color, "color", "black", "line color")
 	flag.StringVar(&bbox, "bbox", "", "bounding box color (\"\" no box)")
-	flag.StringVar(&shape, "shape", "polyline", "polygon or polyline")
+	flag.StringVar(&shape, "shape", "polyline", "polygon, polyline")
+	flag.StringVar(&style, "style", "deck", "deck, decksh, plain")
 	flag.StringVar(&bgcolor, "bgcolor", "", "background color")
 	flag.BoolVar(&fulldeck, "fulldeck", true, "make a full deck")
 	flag.Parse()
 
 	// add deck/slide markup, if specified
 	if fulldeck {
-		kml.Deckbegin(bgcolor)
+		begin(style, color)
 	}
 	for _, filename := range flag.Args() {
 		// read data
@@ -131,21 +180,17 @@ func main() {
 		}
 		// make a bounding box, if specified
 		if len(bbox) > 0 {
-			kml.BoundingBox(mapgeo, bbox)
+			kml.BoundingBox(mapgeo, bbox, style)
 		}
-		// for every placemark, get the coordinates of the polygons
-		for _, pms := range data.Document.Placemark {
-			px, py := kml.ParseCoords(pms.Polygon.OuterBoundaryIs.LinearRing.Coordinates, mapgeo) // single polygons
-			kml.Deckshape(shape, px, py, linewidth, color)
-			mpolys := pms.MultiGeometry.Polygon // multiple polygons
-			for _, p := range mpolys {
-				mx, my := kml.ParseCoords(p.OuterBoundaryIs.LinearRing.Coordinates, mapgeo)
-				kml.Deckshape(shape, mx, my, linewidth, color)
-			}
+		switch style {
+		case "deck", "decksh":
+			kmldeck(data, mapgeo, linewidth, color, shape, style)
+		case "plain", "dump":
+			kmldump(data)
 		}
 	}
 	// end the deck, if specified
 	if fulldeck {
-		kml.Deckend()
+		end(style)
 	}
 }

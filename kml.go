@@ -8,10 +8,12 @@ import (
 )
 
 const (
-	linefmt       = "<line xp1=\"%.3f\" yp1=\"%.3f\" xp2=\"%.3f\" yp2=\"%.3f\" sp=\"%.3f\" color=\"%s\"/>\n"
-	textfmt       = "<text align=\"c\" sp=\"1.2\" xp=\"%.3f\" yp=\"%.3f\">(%.2f, %.2f)</text>\n"
-	rectfmt       = "<rect xp=\"%.3f\" yp=\"%.3f\" wp=\"%.3f\" hp=\"%.3f\" color=\"%s\" opacity=\"10\"/>\n"
-	deckshlinefmt = "line %.3f %.3f %.3f %.3f %.2f \"%s\"\n"
+	linefmt    = "<line xp1=\"%.3f\" yp1=\"%.3f\" xp2=\"%.3f\" yp2=\"%.3f\" sp=\"%.3f\" color=\"%s\"/>\n"
+	textfmt    = "<text align=\"c\" sp=\"1.2\" xp=\"%.3f\" yp=\"%.3f\">(%.2f, %.2f)</text>\n"
+	rectfmt    = "<rect xp=\"%.3f\" yp=\"%.3f\" wp=\"%.3f\" hp=\"%.3f\" color=\"%s\" opacity=\"10\"/>\n"
+	dshlinefmt = "line %.3f %.3f %.3f %.3f %.2f \"%s\"\n"
+	dshtextfmt = "ctext \"(%.2f, %.2f)\" %.3f %.3f 1.2\n"
+	dshrectfmt = "rect %.3f %.3f %.3f %.3f \"%s\" 10\n"
 )
 
 // geometry defines the canvas and map boundaries
@@ -22,8 +24,9 @@ type Geometry struct {
 	Longmin, Longmax float64
 }
 
-// parseCoords makes x, y slices from the string data contained in the kml coordinate element
+// ParseCoords makes x, y slices from the string data contained in the kml coordinate element
 // (lat,long,elevation separated by commas, each coordinate separated by spaces)
+// The coordinates are mapped to a canvas bounding box in g.
 func ParseCoords(s string, g Geometry) ([]float64, []float64) {
 	f := strings.Fields(s)
 	n := len(f)
@@ -40,11 +43,37 @@ func ParseCoords(s string, g Geometry) ([]float64, []float64) {
 	return x, y
 }
 
+// ParsePlainCoords x, y slices from the string data contained in the kml coordinate element
+// (lat,long,elevation separated by commas, each coordinate separated by spaces)
+func ParsePlainCoords(s string) ([]float64, []float64) {
+	f := strings.Fields(s)
+	n := len(f)
+	x := make([]float64, n)
+	y := make([]float64, n)
+	for i, c := range f {
+		coords := strings.Split(c, ",")
+		x[i], _ = strconv.ParseFloat(coords[0], 64)
+		y[i], _ = strconv.ParseFloat(coords[1], 64)
+	}
+	return x, y
+}
+
+// DumpCoords prints coordinates
+func DumpCoords(x, y []float64) {
+	if len(x) != len(y) {
+		return
+	}
+	for i := 0; i < len(x); i++ {
+		fmt.Printf("%g\t%g\n", x[i], y[i])
+	}
+}
+
 // vmap maps one interval to another
 func vmap(value float64, low1 float64, high1 float64, low2 float64, high2 float64) float64 {
 	return low2 + (high2-low2)*(value-low1)/(high1-low1)
 }
 
+// filter makes new coordinates contained within the boundary defined by g.
 func filter(x, y []float64, g Geometry) ([]float64, []float64) {
 	nc := len(x)
 	if nc != len(y) {
@@ -97,7 +126,7 @@ func Deckshpolygon(x, y []float64, color string, g Geometry) {
 	for i := 1; i < len(y); i++ {
 		fmt.Printf(" %.3f", y[i])
 	}
-	fmt.Printf(" %.3f\" %s\n", y[end], color)
+	fmt.Printf(" %.3f\" \"%s\"\n", y[end], color)
 }
 
 // Deckpolyline makes deck markup for a ployline given x, y coordinate slices
@@ -134,21 +163,29 @@ func deckline(x1, y1, x2, y2, lw float64, color string, g Geometry) {
 // deckshline makes a line in decksh markup
 func deckshline(x1, y1, x2, y2, lw float64, color string, g Geometry) {
 	if x1 >= g.Xmin && x2 <= g.Xmax && y1 >= g.Ymin && y2 <= g.Ymax {
-		fmt.Printf(deckshlinefmt, x1, y1, x2, y2, lw, color)
+		fmt.Printf(dshlinefmt, x1, y1, x2, y2, lw, color)
 	}
 }
 
 // Deckshape makes either a set of polylines or polygons given a slice of coordinates
-func Deckshape(name string, x, y []float64, lw float64, color string, g Geometry) {
-	switch name {
-	case "polyline", "line":
-		Deckpolyline(x, y, lw, color, g)
-	case "dline":
-		Deckshpolyline(x, y, lw, color, g)
-	case "polygon", "fill":
-		Deckpolygon(x, y, color, g)
-	case "dpoly":
-		Deckshpolygon(x, y, color, g)
+func Deckshape(shape, style string, x, y []float64, lw float64, color string, g Geometry) {
+	switch style {
+	case "deck":
+		switch shape {
+		case "line", "polyline":
+			Deckpolyline(x, y, lw, color, g)
+		case "fill", "polygon":
+			Deckpolygon(x, y, color, g)
+		}
+	case "decksh":
+		switch shape {
+		case "line", "polyline":
+			Deckshpolyline(x, y, lw, color, g)
+		case "fill", "polygon":
+			Deckshpolygon(x, y, color, g)
+		}
+	case "plain":
+		DumpCoords(x, y)
 	}
 }
 
@@ -166,15 +203,38 @@ func Deckend() {
 	fmt.Printf("</slide></deck>")
 }
 
+// Deckshbegin begins a decksh deck
+func Deckshbegin(bgcolor string) {
+	if bgcolor == "" {
+		fmt.Printf("deck\nslide\n")
+	} else {
+		fmt.Printf("deck\nslide \"%s\"\n", bgcolor)
+	}
+}
+
+// Deckshend ends a decksh deck
+func Deckshend() {
+	fmt.Printf("eslide\nedeck\n")
+}
+
 // BoundingBox makes a lat/long bounding box, labeled at the corners
-func BoundingBox(g Geometry, color string) {
+func BoundingBox(g Geometry, color, style string) {
 	w := g.Xmax - g.Xmin
 	h := g.Ymax - g.Ymin
 	x := g.Xmin + (w / 2)
 	y := g.Ymin + (h / 2)
-	fmt.Printf(textfmt, g.Xmin, g.Ymin, g.Longmin, g.Latmin) // lower left
-	fmt.Printf(textfmt, g.Xmax, g.Ymin, g.Longmax, g.Latmin) // lower right
-	fmt.Printf(textfmt, g.Xmax, g.Ymax, g.Longmax, g.Latmax) // upper right
-	fmt.Printf(textfmt, g.Xmin, g.Ymax, g.Longmin, g.Latmax) // upper right
-	fmt.Printf(rectfmt, x, y, w, h, color)
+
+	if style == "deck" {
+		fmt.Printf(textfmt, g.Xmin, g.Ymin, g.Longmin, g.Latmin) // lower left
+		fmt.Printf(textfmt, g.Xmax, g.Ymin, g.Longmax, g.Latmin) // lower right
+		fmt.Printf(textfmt, g.Xmax, g.Ymax, g.Longmax, g.Latmax) // upper right
+		fmt.Printf(textfmt, g.Xmin, g.Ymax, g.Longmin, g.Latmax) // upper right
+		fmt.Printf(rectfmt, x, y, w, h, color)
+	} else {
+		fmt.Printf(dshtextfmt, g.Longmin, g.Latmin, g.Xmin, g.Ymin) // lower left
+		fmt.Printf(dshtextfmt, g.Longmax, g.Latmin, g.Xmax, g.Ymin) // lower right
+		fmt.Printf(dshtextfmt, g.Longmax, g.Latmax, g.Xmax, g.Ymax) // upper right
+		fmt.Printf(dshtextfmt, g.Longmin, g.Latmax, g.Xmin, g.Ymax) // upper right
+		fmt.Printf(dshrectfmt, x, y, w, h, color)
+	}
 }

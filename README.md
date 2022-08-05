@@ -6,15 +6,20 @@ Convert KML files to deck markup
 
 The package has these functions:
 
-*  ParseCoords(s string, g Geometry) ([]float64, []float64)
-*  Deckpolygon(x, y []float64, color string, g Geometry)
-*  Deckshpolygon(x, y []float64, color string, g Geometry)
-*  Deckpolyline(x, y []float64, lw float64, color string, g Geometry)
-*  Deckshpolyline(x, y []float64, lw float64, color string, g Geometry)
-*  Deckshape(name string, x, y []float64, lw float64, color string, g Geometry)
-*  Deckbegin(bgcolor string)
-*  Deckend()
-*  BoundingBox(g Geometry, color string)
+* BoundingBox(g Geometry, color, style string) 
+* Deckbegin(bgcolor string) 
+* Deckend() 
+* Deckpolygon(x, y []float64, color string, g Geometry) 
+* Deckpolyline(x, y []float64, lw float64, color string, g Geometry) 
+* Deckshape(shape, style string, x, y []float64, lw float64, color string, g Geometry) 
+* Deckshbegin(bgcolor string) 
+* Deckshend() 
+* Deckshpolygon(x, y []float64, color string, g Geometry) 
+* Deckshpolyline(x, y []float64, lw float64, color string, g Geometry) 
+* DumpCoords(x, y []float64) 
+* ParseCoords(s string, g Geometry) ([]float64, []float64) 
+* ParsePlainCoords(s string) ([]float64, []float64) 
+
 
 
 The package assumes the calling main package will parse the KML files, extracting coordinates
@@ -55,7 +60,9 @@ There are two example clients:
   -longmin float
       longitude y minimum (default -180)
   -shape string
-      polygon or polyline (default "polyline")
+      polygon, polyline (default "polyline")
+  -style string
+      deck, decksh, plain (default "deck")
   -xmax float
       canvas x maxmum (default 95)
   -xmin float
@@ -64,6 +71,7 @@ There are two example clients:
       canvas y maximum (default 95)
   -ymin float
       canvas y minimum (default 5)
+
 ```
 
 The included KML files are from the [opendatasoft site](https://public.opendatasoft.com/explore/dataset/world-administrative-boundaries/export/)
@@ -86,6 +94,8 @@ The included KML files are from the [opendatasoft site](https://public.opendatas
 ```
   -bbox string
       bounding box color ("" no box)
+  -bgcolor string
+      background color
   -color string
       line color (default "black")
   -fulldeck
@@ -102,6 +112,8 @@ The included KML files are from the [opendatasoft site](https://public.opendatas
       longitude y minimum (default -125)
   -shape string
       polygon or polyline (default "polyline")
+  -style string
+      deck, decksh, or plain (default "deck")
   -xmax float
       canvas x maxmum (default 95)
   -xmin float
@@ -110,7 +122,6 @@ The included KML files are from the [opendatasoft site](https://public.opendatas
       canvas y maximum (default 80)
   -ymin float
       canvas y minimum (default 10)
-
 ```
 
 The data in the repository is from the [US Census](https://www.census.gov/geographies/mapping-files/time-series/geo/kml-cartographic-boundary-files.html)
