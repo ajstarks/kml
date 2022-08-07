@@ -6,21 +6,19 @@ Convert KML files to deck markup
 
 The package has these functions:
 
-* BoundingBox(g Geometry, color, style string) 
-* Deckbegin(bgcolor string) 
-* Deckend() 
-* Deckpolygon(x, y []float64, color string, g Geometry) 
-* Deckpolyline(x, y []float64, lw float64, color string, g Geometry) 
-* Deckshape(shape, style string, x, y []float64, lw float64, color string, g Geometry) 
-* Deckshbegin(bgcolor string) 
-* Deckshend() 
-* Deckshpolygon(x, y []float64, color string, g Geometry) 
-* Deckshpolyline(x, y []float64, lw float64, color string, g Geometry) 
-* DumpCoords(x, y []float64) 
-* ParseCoords(s string, g Geometry) ([]float64, []float64) 
-* ParsePlainCoords(s string) ([]float64, []float64) 
-
-
+* BoundingBox(g Geometry, color, style string)                                             // makes a bounding box
+* Deckbegin(bgcolor string)                                                                // begin deck
+* Deckend()                                                                                // end deck
+* Deckpolygon(x, y []float64, color string, g Geometry)                                    // make a polygon, deck markup
+* Deckpolyline(x, y []float64, lw float64, color string, g Geometry)                       // make a polyline, deck markup
+* Deckshape(shape, style string, x, y []float64, lw float64, color string, g Geometry)     // make markup 
+* Deckshbegin(bgcolor string)                                                              // begin deck, decksh markup
+* Deckshend()                                                                              // end deck, decksh markup
+* Deckshpolygon(x, y []float64, color string, g Geometry)                                  // make polygon, decksh markup
+* Deckshpolyline(x, y []float64, lw float64, color string, g Geometry)                     // make polyline, decksh markup
+* DumpCoords(x, y []float64)                                                               // print raw coordinates
+* ParseCoords(s string, g Geometry) ([]float64, []float64)                                 // extract and map coordinates from KML
+* ParsePlainCoords(s string) ([]float64, []float64)                                        // extract coordinates from KML
 
 The package assumes the calling main package will parse the KML files, extracting coordinates
 There are two example clients:
@@ -80,15 +78,15 @@ The included KML files are from the [opendatasoft site](https://public.opendatas
 
 ![kml-example](us-states.png)
 
-```./usmap -linewidth=0.075 -bbox=blue < cb_2018_us_state_5m.kml | pdfdeck -stdout - > states.pdf```
+```./usmap -linewidth=0.075 -bbox=blue  cb_2018_us_state_5m.kml | pdfdeck -stdout - > states.pdf```
 
 ![kml-counties](us-counties.png)
 
-```./usmap -linewidth=0.075 -bbox=blue < cb_2018_us_county_20m.kml | pdfdeck -stdout - > counties.pdf```
+```./usmap -linewidth=0.075 -bbox=blue  cb_2018_us_county_20m.kml | pdfdeck -stdout - > counties.pdf```
 
 ![kml-filled](filled.png)
 
-```./usmap -color "hsv(240,100,30)" -bbox blue  -shape fill  < cb_2018_us_nation_20m.kml | pdfdeck -stdout - > nation.pdf```
+```./usmap -color "hsv(240,100,30)" -bbox blue  -shape fill   cb_2018_us_nation_20m.kml | pdfdeck -stdout - > nation.pdf```
 
 ### options
 ```

@@ -171,28 +171,36 @@ func main() {
 	flag.BoolVar(&fulldeck, "fulldeck", true, "make a full deck")
 	flag.Parse()
 
-	// read data
-	data, err := readData(os.Stdin)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v\n", err)
-		os.Exit(1)
-	}
 	// add deck/slide markup, if specified
 	if fulldeck {
 		begin(bgcolor, style)
 	}
-	// make a bounding box, if specified
-	if len(bbox) > 0 {
-		kml.BoundingBox(mapgeo, bbox, style)
-	}
-	// for every placemark, get the coordinates of the polygons
-	for _, pms := range data.Document.Folder.Placemark {
-		px, py := kml.ParseCoords(pms.Polygon.OuterBoundaryIs.LinearRing.Coordinates, mapgeo) // single polygons
-		kml.Deckshape(shape, style, px, py, linewidth, color, mapgeo)
-		mpolys := pms.MultiGeometry.Polygon // multiple polygons
-		for _, p := range mpolys {
-			mx, my := kml.ParseCoords(p.OuterBoundaryIs.LinearRing.Coordinates, mapgeo)
-			kml.Deckshape(shape, style, mx, my, linewidth, color, mapgeo)
+	// for every file...
+	for _, filename := range flag.Args() {
+		r, err := os.Open(filename)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%v\n", err)
+			continue
+		}
+		// read data
+		data, err := readData(r)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%v\n", err)
+			continue
+		}
+		// make a bounding box, if specified
+		if len(bbox) > 0 {
+			kml.BoundingBox(mapgeo, bbox, style)
+		}
+		// for every placemark, get the coordinates of the polygons
+		for _, pms := range data.Document.Folder.Placemark {
+			px, py := kml.ParseCoords(pms.Polygon.OuterBoundaryIs.LinearRing.Coordinates, mapgeo) // single polygons
+			kml.Deckshape(shape, style, px, py, linewidth, color, mapgeo)
+			mpolys := pms.MultiGeometry.Polygon // multiple polygons
+			for _, p := range mpolys {
+				mx, my := kml.ParseCoords(p.OuterBoundaryIs.LinearRing.Coordinates, mapgeo)
+				kml.Deckshape(shape, style, mx, my, linewidth, color, mapgeo)
+			}
 		}
 	}
 	// end the deck, if specified
