@@ -5,20 +5,27 @@ Convert KML files to deck markup
 ## Functions
 
 The package has these functions:
+```
+BoundingBox(g Geometry, color, style string)                                        // makes a bounding box
 
-* BoundingBox(g Geometry, color, style string)                                             // makes a bounding box
-* Deckbegin(bgcolor string)                                                                // begin deck
-* Deckend()                                                                                // end deck
-* Deckpolygon(x, y []float64, color string, g Geometry)                                    // make a polygon, deck markup
-* Deckpolyline(x, y []float64, lw float64, color string, g Geometry)                       // make a polyline, deck markup
-* Deckshape(shape, style string, x, y []float64, lw float64, color string, g Geometry)     // make markup 
-* Deckshbegin(bgcolor string)                                                              // begin deck, decksh markup
-* Deckshend()                                                                              // end deck, decksh markup
-* Deckshpolygon(x, y []float64, color string, g Geometry)                                  // make polygon, decksh markup
-* Deckshpolyline(x, y []float64, lw float64, color string, g Geometry)                     // make polyline, decksh markup
-* DumpCoords(x, y []float64)                                                               // print raw coordinates
-* ParseCoords(s string, g Geometry) ([]float64, []float64)                                 // extract and map coordinates from KML
-* ParsePlainCoords(s string) ([]float64, []float64)                                        // extract coordinates from KML
+Deckbegin(bgcolor string)                                                           // begin deck
+Deckend()                                                                           // end deck
+
+Deckshbegin(bgcolor string)                                                         // begin deck, decksh markup
+Deckshend()                                                                         // end deck, decksh markup
+
+Deckpolygon(x, y []float64, color string, g Geometry)                               // make a polygon, deck markup
+Deckpolyline(x, y []float64, lw float64, color string, g Geometry)                  // make a polyline, deck markup
+
+Deckshpolygon(x, y []float64, color string, g Geometry)                             // make polygon, decksh markup
+Deckshpolyline(x, y []float64, lw float64, color string, g Geometry)                // make polyline, decksh markup
+
+Deckshape(shape, style string, x, y []float64, lw float64, color string, g Geometry // make markup 
+
+DumpCoords(x, y []float64)                                                          // print raw coordinates
+ParseCoords(s string, g Geometry) ([]float64, []float64)                            // extract and map coordinates
+ParsePlainCoords(s string) ([]float64, []float64)                                   // extract coordinates
+```
 
 The package assumes the calling main package will parse the KML files, extracting coordinates
 There are two example clients:
@@ -74,7 +81,7 @@ There are two example clients:
 
 The included KML files are from the [opendatasoft site](https://public.opendatasoft.com/explore/dataset/world-administrative-boundaries/export/)
 
-## USMAP
+## usmap
 
 ![kml-example](us-states.png)
 
