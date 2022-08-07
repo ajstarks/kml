@@ -173,7 +173,7 @@ func main() {
 
 	// add deck/slide markup, if specified
 	if fulldeck {
-		begin(bgcolor, style)
+		begin(style, bgcolor)
 	}
 	// for every file...
 	for _, filename := range flag.Args() {
