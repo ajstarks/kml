@@ -8,12 +8,12 @@ import (
 )
 
 const (
-	linefmt    = "<line xp1=\"%.3f\" yp1=\"%.3f\" xp2=\"%.3f\" yp2=\"%.3f\" sp=\"%.3f\" color=\"%s\"/>\n"
-	textfmt    = "<text align=\"c\" sp=\"1.2\" xp=\"%.3f\" yp=\"%.3f\">(%.2f, %.2f)</text>\n"
-	rectfmt    = "<rect xp=\"%.3f\" yp=\"%.3f\" wp=\"%.3f\" hp=\"%.3f\" color=\"%s\" opacity=\"10\"/>\n"
-	dshlinefmt = "line %.3f %.3f %.3f %.3f %.2f \"%s\"\n"
-	dshtextfmt = "ctext \"(%.2f, %.2f)\" %.3f %.3f 1.2\n"
-	dshrectfmt = "rect %.3f %.3f %.3f %.3f \"%s\" 10\n"
+	linefmt    = "<line xp1=\"%.5f\" yp1=\"%.5f\" xp2=\"%.5f\" yp2=\"%.5f\" sp=\"%.5f\" color=\"%s\"/>\n"
+	textfmt    = "<text align=\"c\" sp=\"1.0\" xp=\"%.5f\" yp=\"%.5f\">(%.5f, %.5f)</text>\n"
+	rectfmt    = "<rect xp=\"%.5f\" yp=\"%.5f\" wp=\"%.5f\" hp=\"%.5f\" color=\"%s\" opacity=\"10\"/>\n"
+	dshlinefmt = "line %.5f %.5f %.5f %.5f %.2f \"%s\"\n"
+	dshtextfmt = "ctext \"(%.5f, %.5f)\" %.5f %.5f 1.0\n"
+	dshrectfmt = "rect %.5f %.5f %.5f %.5f \"%s\" 10\n"
 )
 
 // geometry defines the canvas and map boundaries
