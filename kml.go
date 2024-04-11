@@ -90,14 +90,26 @@ func filter(x, y []float64, g Geometry) ([]float64, []float64) {
 	return xp, yp
 }
 
+// colorop makes a color and optional opacity in the form of name:op
+func colorop(color string) (string, string) {
+	ci := strings.Index(color, ":")
+	op := "100"
+	if ci > 0 && ci < len(color) {
+		op = color[ci+1:]
+		color = color[0:ci]
+	}
+	return color, op
+}
+
 // Deckpolygon makes deck markup for a polygon given x, y coordinates slices
 func Deckpolygon(x, y []float64, color string, g Geometry) {
 	nc := len(x)
 	if nc < 3 || nc != len(x) {
 		return
 	}
+	fill, op := colorop(color)
 	end := nc - 1
-	fmt.Printf("<polygon color=\"%s\" xc=\"%.3f", color, x[0])
+	fmt.Printf("<polygon color=\"%s\" opacity=\"%s\" xc=\"%.3f", fill, op, x[0])
 	for i := 1; i < nc; i++ {
 		fmt.Printf(" %.3f", x[i])
 	}
@@ -115,6 +127,7 @@ func Deckshpolygon(x, y []float64, color string, g Geometry) {
 	if nc < 3 || nc != len(y) {
 		return
 	}
+	fill, op := colorop(color)
 	end := nc - 1
 	fmt.Printf("polygon \"%.3f", x[0])
 	for i := 1; i < len(x); i++ {
@@ -126,7 +139,7 @@ func Deckshpolygon(x, y []float64, color string, g Geometry) {
 	for i := 1; i < len(y); i++ {
 		fmt.Printf(" %.3f", y[i])
 	}
-	fmt.Printf(" %.3f\" \"%s\"\n", y[end], color)
+	fmt.Printf(" %.3f\" \"%s\" %s\n", y[end], fill, op)
 }
 
 // Deckpolyline makes deck markup for a ployline given x, y coordinate slices
