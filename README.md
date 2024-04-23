@@ -51,7 +51,7 @@ There are two example clients:
   -bgcolor string
       background color
   -color string
-      line color (default "black")
+      fill or line color (default "black")
       (specify opacity with name:op)
   -fulldeck
       make a full deck (default true)
@@ -103,7 +103,8 @@ The included KML files are from the [opendatasoft site](https://public.opendatas
   -bgcolor string
       background color
   -color string
-      line color (default "black")
+      fill or line color (default "black")
+      (specify opacity with name:op)
   -fulldeck
       make a full deck (default true)
   -latmax float

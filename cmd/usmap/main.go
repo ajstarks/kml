@@ -146,6 +146,32 @@ func end(style string) {
 	}
 }
 
+func kmldeck(data Kml, mapgeo kml.Geometry, linewidth float64, color, shape, style string) {
+	// for every placemark, get the coordinates of the polygons
+	for _, pms := range data.Document.Folder.Placemark {
+		px, py := kml.ParseCoords(pms.Polygon.OuterBoundaryIs.LinearRing.Coordinates, mapgeo) // single polygons
+		kml.Deckshape(shape, style, px, py, linewidth, color, mapgeo)
+		mpolys := pms.MultiGeometry.Polygon // multiple polygons
+		for _, p := range mpolys {
+			mx, my := kml.ParseCoords(p.OuterBoundaryIs.LinearRing.Coordinates, mapgeo)
+			kml.Deckshape(shape, style, mx, my, linewidth, color, mapgeo)
+		}
+	}
+}
+
+func kmldump(data Kml) {
+	// for every placemark, get the coordinates of the polygons
+	for _, pms := range data.Document.Folder.Placemark {
+		px, py := kml.ParsePlainCoords(pms.Polygon.OuterBoundaryIs.LinearRing.Coordinates) // single polygons
+		kml.DumpCoords(px, py)
+		mpolys := pms.MultiGeometry.Polygon // multiple polygons
+		for _, p := range mpolys {
+			mx, my := kml.ParsePlainCoords(p.OuterBoundaryIs.LinearRing.Coordinates)
+			kml.DumpCoords(mx, my)
+		}
+	}
+}
+
 func main() {
 
 	var mapgeo kml.Geometry
@@ -163,7 +189,7 @@ func main() {
 	flag.Float64Var(&mapgeo.Longmin, "longmin", -125, "longitude y minimum")
 	flag.Float64Var(&mapgeo.Longmax, "longmax", -67, "longitude y maximum")
 	flag.Float64Var(&linewidth, "linewidth", 0.1, "line width")
-	flag.StringVar(&color, "color", "black", "line color")
+	flag.StringVar(&color, "color", "black", "line or fill color (name:op to specify opacity)")
 	flag.StringVar(&bbox, "bbox", "", "bounding box color (\"\" no box)")
 	flag.StringVar(&shape, "shape", "polyline", "polygon or polyline")
 	flag.StringVar(&style, "style", "deck", "deck, decksh, or plain")
@@ -192,16 +218,13 @@ func main() {
 		if len(bbox) > 0 {
 			kml.BoundingBox(mapgeo, bbox, style)
 		}
-		// for every placemark, get the coordinates of the polygons
-		for _, pms := range data.Document.Folder.Placemark {
-			px, py := kml.ParseCoords(pms.Polygon.OuterBoundaryIs.LinearRing.Coordinates, mapgeo) // single polygons
-			kml.Deckshape(shape, style, px, py, linewidth, color, mapgeo)
-			mpolys := pms.MultiGeometry.Polygon // multiple polygons
-			for _, p := range mpolys {
-				mx, my := kml.ParseCoords(p.OuterBoundaryIs.LinearRing.Coordinates, mapgeo)
-				kml.Deckshape(shape, style, mx, my, linewidth, color, mapgeo)
-			}
+		switch style {
+		case "deck", "decksh":
+			kmldeck(data, mapgeo, linewidth, color, shape, style)
+		case "plain", "dump":
+			kmldump(data)
 		}
+
 	}
 	// end the deck, if specified
 	if fulldeck {
