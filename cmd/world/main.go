@@ -159,7 +159,7 @@ func main() {
 	flag.Float64Var(&mapgeo.Longmin, "longmin", -180, "longitude y minimum")
 	flag.Float64Var(&mapgeo.Longmax, "longmax", 180, "longitude y maximum")
 	flag.Float64Var(&linewidth, "linewidth", 0.1, "line width")
-	flag.StringVar(&color, "color", "black", "line color")
+	flag.StringVar(&color, "color", "black", "line or fill color (name:op to specify opacity)")
 	flag.StringVar(&bbox, "bbox", "", "bounding box color (\"\" no box)")
 	flag.StringVar(&shape, "shape", "polyline", "polygon, polyline")
 	flag.StringVar(&style, "style", "deck", "deck, decksh, plain")
