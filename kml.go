@@ -110,7 +110,7 @@ func DeckPoint(x, y []float64, color string, lw float64) {
 	}
 	fill, op := colorop(color)
 	for i := 0; i < nc-1; i++ {
-		fmt.Printf("<circle xp=\"%.3f\" yp=\"%.3f\" sp=\"%.3f\" color=\"%s\" opacity=\"%s\"\n", x[i], y[i], lw, fill, op)
+		fmt.Printf("<circle xp=\"%.3f\" yp=\"%.3f\" sp=\"%.3f\" color=\"%s\" opacity=\"%s\"/>\n", x[i], y[i], lw, fill, op)
 	}
 }
 
