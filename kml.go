@@ -101,10 +101,23 @@ func colorop(color string) (string, string) {
 	return color, op
 }
 
+// DeckPoint makes deck markup for points given x, y coordinates slices
+func DeckPoint(x, y []float64, color string, lw float64) {
+	nc := len(x)
+	if nc != len(y) {
+		println(nc, len(y))
+		return
+	}
+	fill, op := colorop(color)
+	for i := 0; i < nc-1; i++ {
+		fmt.Printf("<circle xp=\"%.3f\" yp=\"%.3f\" sp=\"%.3f\" color=\"%s\" opacity=\"%s\"\n", x[i], y[i], lw, fill, op)
+	}
+}
+
 // Deckpolygon makes deck markup for a polygon given x, y coordinates slices
 func Deckpolygon(x, y []float64, color string, g Geometry) {
 	nc := len(x)
-	if nc < 3 || nc != len(x) {
+	if nc < 3 || nc != len(y) {
 		return
 	}
 	fill, op := colorop(color)
@@ -119,6 +132,31 @@ func Deckpolygon(x, y []float64, color string, g Geometry) {
 		fmt.Printf(" %.3f", y[i])
 	}
 	fmt.Printf(" %.3f\"/>\n", y[end])
+}
+
+// Deckpolyline makes deck markup for a ployline given x, y coordinate slices
+func Deckpolyline(x, y []float64, lw float64, color string, g Geometry) {
+	lx := len(x)
+	if lx < 2 {
+		return
+	}
+	for i := 0; i < lx-1; i++ {
+		deckline(x[i], y[i], x[i+1], y[i+1], lw, color, g)
+	}
+	deckline(x[0], y[0], x[lx-1], y[lx-1], lw, color, g)
+}
+
+// DeckshPoint makes decksh markup for points given x, y coordinates slices
+func DeckshPoint(x, y []float64, color string, lw float64) {
+	nc := len(x)
+	if nc != len(y) {
+		println(nc, len(y))
+		return
+	}
+	fill, op := colorop(color)
+	for i := 0; i < nc-1; i++ {
+		fmt.Printf("circle %.3f %.3f %.3f \"%s\" %s\n", x[i], y[i], lw, fill, op)
+	}
 }
 
 // Deckshpoly makes decksh markup for a polygon or polyline given x, y slices
@@ -140,18 +178,6 @@ func Deckshpolygon(x, y []float64, color string, g Geometry) {
 		fmt.Printf(" %.3f", y[i])
 	}
 	fmt.Printf(" %.3f\" \"%s\" %s\n", y[end], fill, op)
-}
-
-// Deckpolyline makes deck markup for a ployline given x, y coordinate slices
-func Deckpolyline(x, y []float64, lw float64, color string, g Geometry) {
-	lx := len(x)
-	if lx < 2 {
-		return
-	}
-	for i := 0; i < lx-1; i++ {
-		deckline(x[i], y[i], x[i+1], y[i+1], lw, color, g)
-	}
-	deckline(x[0], y[0], x[lx-1], y[lx-1], lw, color, g)
 }
 
 // Deckshpolyline makes decksh markup for a polyline given x, y coordinate slices
@@ -189,6 +215,8 @@ func Deckshape(shape, style string, x, y []float64, lw float64, color string, g 
 			Deckpolyline(x, y, lw, color, g)
 		case "fill", "polygon":
 			Deckpolygon(x, y, color, g)
+		case "dot", "circle":
+			DeckPoint(x, y, color, lw)
 		}
 	case "decksh":
 		switch shape {
@@ -196,6 +224,8 @@ func Deckshape(shape, style string, x, y []float64, lw float64, color string, g 
 			Deckshpolyline(x, y, lw, color, g)
 		case "fill", "polygon":
 			Deckshpolygon(x, y, color, g)
+		case "dot", "circle":
+			DeckshPoint(x, y, color, lw)
 		}
 	case "plain":
 		DumpCoords(x, y)
