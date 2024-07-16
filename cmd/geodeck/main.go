@@ -138,6 +138,7 @@ func process(filename string, dest io.Writer, c config, mapgeo kml.Geometry) {
 
 }
 
+// begindeck makes the beginning markup
 func begindeck(dest io.Writer, style string) {
 	if style == "deck" {
 		fmt.Fprintln(dest, "<deck>")
@@ -145,6 +146,8 @@ func begindeck(dest io.Writer, style string) {
 		fmt.Fprintln(dest, "deck")
 	}
 }
+
+// enddeck makes the ending markup
 func enddeck(dest io.Writer, style string) {
 	if style == "deck" {
 		fmt.Fprintln(dest, "</deck>")
@@ -153,6 +156,7 @@ func enddeck(dest io.Writer, style string) {
 	}
 }
 
+// beginslide makes the markup for the beginning of a slide
 func beginslide(dest io.Writer, bgcolor, style string) {
 	if style == "deck" {
 		fmt.Fprintf(dest, "<slide bg=%q>\n", bgcolor)
@@ -161,6 +165,7 @@ func beginslide(dest io.Writer, bgcolor, style string) {
 	}
 }
 
+// endslides makes the markup for the ending of a slide
 func endslide(dest io.Writer, style string) {
 	if style == "deck" {
 		fmt.Fprintln(dest, "</slide>")
