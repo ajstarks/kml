@@ -105,11 +105,10 @@ func colorop(color string) (string, string) {
 func DeckPoint(x, y []float64, color string, lw float64) {
 	nc := len(x)
 	if nc != len(y) {
-		println(nc, len(y))
 		return
 	}
 	fill, op := colorop(color)
-	for i := 0; i < nc-1; i++ {
+	for i := 0; i < nc; i++ {
 		fmt.Printf("<ellipse xp=\"%.3f\" yp=\"%.3f\" wp=\"%.3f\" hr=\"100\" color=\"%s\" opacity=\"%s\"/>\n", x[i], y[i], lw, fill, op)
 	}
 }
@@ -150,11 +149,10 @@ func Deckpolyline(x, y []float64, lw float64, color string, g Geometry) {
 func DeckshPoint(x, y []float64, color string, lw float64) {
 	nc := len(x)
 	if nc != len(y) {
-		println(nc, len(y))
 		return
 	}
 	fill, op := colorop(color)
-	for i := 0; i < nc-1; i++ {
+	for i := 0; i < nc; i++ {
 		fmt.Printf("circle %.3f %.3f %.3f \"%s\" %s\n", x[i], y[i], lw, fill, op)
 	}
 }
