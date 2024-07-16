@@ -8,10 +8,10 @@ import (
 )
 
 const (
-	linefmt    = "<line xp1=\"%.5f\" yp1=\"%.5f\" xp2=\"%.5f\" yp2=\"%.5f\" sp=\"%.5f\" color=\"%s\"/>\n"
+	linefmt    = "<line xp1=\"%.5f\" yp1=\"%.5f\" xp2=\"%.5f\" yp2=\"%.5f\" sp=\"%.5f\" color=\"%s\" opacity=\"%s\"/>\n"
 	textfmt    = "<text align=\"c\" sp=\"1.0\" xp=\"%.5f\" yp=\"%.5f\">(%.5f, %.5f)</text>\n"
 	rectfmt    = "<rect xp=\"%.5f\" yp=\"%.5f\" wp=\"%.5f\" hp=\"%.5f\" color=\"%s\" opacity=\"10\"/>\n"
-	dshlinefmt = "line %.5f %.5f %.5f %.5f %.2f \"%s\"\n"
+	dshlinefmt = "line %.5f %.5f %.5f %.5f %.2f \"%s\" %s\n"
 	dshtextfmt = "ctext \"(%.5f, %.5f)\" %.5f %.5f 1.0\n"
 	dshrectfmt = "rect %.5f %.5f %.5f %.5f \"%s\" 10\n"
 )
@@ -139,10 +139,11 @@ func Deckpolyline(x, y []float64, lw float64, color string, g Geometry) {
 	if lx < 2 {
 		return
 	}
+	fill, op := colorop(color)
 	for i := 0; i < lx-1; i++ {
-		deckline(x[i], y[i], x[i+1], y[i+1], lw, color, g)
+		deckline(x[i], y[i], x[i+1], y[i+1], lw, fill, op, g)
 	}
-	deckline(x[0], y[0], x[lx-1], y[lx-1], lw, color, g)
+	deckline(x[0], y[0], x[lx-1], y[lx-1], lw, fill, op, g)
 }
 
 // DeckshPoint makes decksh markup for points given x, y coordinates slices
@@ -184,23 +185,24 @@ func Deckshpolyline(x, y []float64, lw float64, color string, g Geometry) {
 	if lx < 2 {
 		return
 	}
+	fill, op := colorop(color)
 	for i := 0; i < lx-1; i++ {
-		deckshline(x[i], y[i], x[i+1], y[i+1], lw, color, g)
+		deckshline(x[i], y[i], x[i+1], y[i+1], lw, fill, op, g)
 	}
-	deckshline(x[0], y[0], x[lx-1], y[lx-1], lw, color, g)
+	deckshline(x[0], y[0], x[lx-1], y[lx-1], lw, fill, op, g)
 }
 
 // deckline makes a line in deck markup
-func deckline(x1, y1, x2, y2, lw float64, color string, g Geometry) {
+func deckline(x1, y1, x2, y2, lw float64, fill, op string, g Geometry) {
 	if x1 >= g.Xmin && x2 <= g.Xmax && y1 >= g.Ymin && y2 <= g.Ymax {
-		fmt.Printf(linefmt, x1, y1, x2, y2, lw, color)
+		fmt.Printf(linefmt, x1, y1, x2, y2, lw, fill, op)
 	}
 }
 
 // deckshline makes a line in decksh markup
-func deckshline(x1, y1, x2, y2, lw float64, color string, g Geometry) {
+func deckshline(x1, y1, x2, y2, lw float64, fill, op string, g Geometry) {
 	if x1 >= g.Xmin && x2 <= g.Xmax && y1 >= g.Ymin && y2 <= g.Ymax {
-		fmt.Printf(dshlinefmt, x1, y1, x2, y2, lw, color)
+		fmt.Printf(dshlinefmt, x1, y1, x2, y2, lw, fill, op)
 	}
 }
 
