@@ -15,7 +15,7 @@ import (
 // config: a bag of configuration options
 type config struct {
 	fulldeck, info, autobbox           bool
-	linewidth                          float64
+	shapesize                          float64
 	color, bbox, shape, bgcolor, style string
 }
 
@@ -33,7 +33,7 @@ func mapData(x, y []float64, g kml.Geometry) ([]float64, []float64) {
 	return x, y
 }
 
-// readData reads lat/long pairs (separated by white space) from a file, mapping to deck coordinates
+// readData reads lat/long pairs (separated by white space) from a file
 func readData(r io.Reader) ([]float64, []float64, error) {
 	x := []float64{}
 	y := []float64{}
@@ -130,12 +130,11 @@ func process(filename string, dest io.Writer, c config, mapgeo kml.Geometry) {
 	}
 	// map to deck canvas, make the drawing
 	x, y = mapData(x, y, mapgeo)
-	kml.Deckshape(c.shape, c.style, x, y, c.linewidth, c.color, mapgeo)
+	kml.Deckshape(c.shape, c.style, x, y, c.shapesize, c.color, mapgeo)
 	// end the slide, if specified
 	if c.fulldeck {
 		endslide(dest, c.style)
 	}
-
 }
 
 // begindeck makes the beginning markup
@@ -189,7 +188,7 @@ func main() {
 	// config options
 	flag.BoolVar(&cfg.info, "info", false, "only report center and bounding box info")
 	flag.BoolVar(&cfg.autobbox, "autobbox", true, "autoscale according to input values")
-	flag.Float64Var(&cfg.linewidth, "linewidth", 0.1, "line width")
+	flag.Float64Var(&cfg.shapesize, "shapesize", 0.25, "shapesize (linewidth or dotsize)")
 	flag.StringVar(&cfg.color, "color", "black", "line color")
 	flag.StringVar(&cfg.bbox, "bbox", "", "bounding box color (\"\" no box)")
 	flag.StringVar(&cfg.shape, "shape", "polyline", "polygon (fill), polyline (line), circle (dot)")
