@@ -51,7 +51,7 @@ Usage of geodeck:
       latitude x maxmum (default 90)
   -latmin float
       latitude x minimum (default -90)
-  -linewidth float
+  -shapesize float
       line width (default 0.1)
   -longmax float
       longitude y maximum (default 180)
