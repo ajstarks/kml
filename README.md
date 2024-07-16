@@ -14,15 +14,15 @@ Deckend()                                                                       
 Deckshbegin(bgcolor string)                                                         // begin deck, decksh markup
 Deckshend()                                                                         // end deck, decksh markup
 
-DeckPoint(x, y []float64, color string, lw float64)                                 // make circles, deck markup
+DeckPoint(x, y []float64, color string, shapesize float64)                                 // make circles, deck markup
 Deckpolygon(x, y []float64, color string, g Geometry)                               // make a polygon, deck markup
-Deckpolyline(x, y []float64, lw float64, color string, g Geometry)                  // make a polyline, deck markup
+Deckpolyline(x, y []float64, shapesize float64, color string, g Geometry)                  // make a polyline, deck markup
 
-DeckshPoint(x, y []float64, color string, lw float64)                               // make circles, decksh markup
+DeckshPoint(x, y []float64, color string, shapesize float64)                               // make circles, decksh markup
 Deckshpolygon(x, y []float64, color string, g Geometry)                             // make polygon, decksh markup
-Deckshpolyline(x, y []float64, lw float64, color string, g Geometry)                // make polyline, decksh markup
+Deckshpolyline(x, y []float64, shapesize float64, color string, g Geometry)                // make polyline, decksh markup
 
-Deckshape(shape, style string, x, y []float64, lw float64, color string, g Geometry // make markup 
+Deckshape(shape, style string, x, y []float64, shapesize float64, color string, g Geometry // make markup
 
 DumpCoords(x, y []float64)                                                          // print raw coordinates
 ParseCoords(s string, g Geometry) ([]float64, []float64)                            // extract and map coordinates
@@ -39,8 +39,8 @@ Note that ```fitscsvcoord``` converts from "semicircle" units to decimal latitud
 
 ```
 java -jar $JARLOC/FitCSVTool.jar -iso8601 path.fit |
-grep position_lat | 
-csvread  -plain=t 4 7 10  | 
+grep position_lat |
+csvread  -plain=t 4 7 10  |
 awk 'length($1) == 20 {printf "%.6f %.6f\n",  $2 * (180/2^31) , $3 * (180/2^31)}'
 
 ```
@@ -84,8 +84,8 @@ Usage of geodeck:
       latitude x maxmum (default 90)
   -latmin float
       latitude x minimum (default -90)
-  -linewidth float
-      line width (default 0.1)
+  -shapesize float
+      line width (default 0.25)
   -longmax float
       longitude y maximum (default 180)
   -longmin float
@@ -208,5 +208,3 @@ The included KML files are from the [opendatasoft site](https://public.opendatas
 ```
 
 The data in the repository is from the [US Census](https://www.census.gov/geographies/mapping-files/time-series/geo/kml-cartographic-boundary-files.html)
-
-
