@@ -14,9 +14,9 @@ import (
 
 // config: a bag of configuration options
 type config struct {
-	fulldeck, info, autobbox           bool
-	shapesize                          float64
-	color, bbox, shape, bgcolor, style string
+	fulldeck, info, autobbox                            bool
+	shapesize, textsize                                 float64
+	textcolor, color, bbox, shape, bgcolor, style, text string
 }
 
 // vmap maps one interval to another
@@ -58,6 +58,33 @@ func readData(r io.Reader) ([]float64, []float64, error) {
 	return x, y, s.Err()
 }
 
+// readLoc reads lat/long pairs and an optional name (separated by white space) from a file
+func readLoc(r io.Reader) (kml.Locdata, error) {
+	var data kml.Locdata
+	s := bufio.NewScanner(r)
+	for s.Scan() {
+		t := s.Text()
+		f := strings.Fields(t)
+		if len(f) < 2 { // not enough fields
+			continue
+		}
+		xp, err := strconv.ParseFloat(f[1], 64) // long
+		if err != nil {
+			continue
+		}
+		yp, err := strconv.ParseFloat(f[0], 64) // lat
+		if err != nil {
+			continue
+		}
+		data.X = append(data.X, xp)
+		data.Y = append(data.Y, yp)
+		if len(f) > 2 { // if name is present
+			data.Name = append(data.Name, f[2])
+		}
+	}
+	return data, s.Err()
+}
+
 // bboxData returns minima and maxima from data
 func bboxData(x, y []float64) (float64, float64, float64, float64) {
 	maxx := -180.0
@@ -97,7 +124,10 @@ func process(filename string, dest io.Writer, c config, mapgeo kml.Geometry) {
 		}
 	}
 	// read coordinates
-	x, y, err := readData(r)
+	//x, y, err := readData(r)
+	loc, err := readLoc(r)
+	x := loc.X
+	y := loc.Y
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
 		return
@@ -131,6 +161,10 @@ func process(filename string, dest io.Writer, c config, mapgeo kml.Geometry) {
 	// map to deck canvas, make the drawing
 	x, y = mapData(x, y, mapgeo)
 	kml.Deckshape(c.shape, c.style, x, y, c.shapesize, c.color, mapgeo)
+
+	if len(c.text) > 0 {
+		kml.DeckText(c.text, c.style, x, y, loc.Name, c.textsize, c.textcolor)
+	}
 	// end the slide, if specified
 	if c.fulldeck {
 		endslide(dest, c.style)
@@ -193,6 +227,9 @@ func main() {
 	flag.StringVar(&cfg.bbox, "bbox", "", "bounding box color (\"\" no box)")
 	flag.StringVar(&cfg.shape, "shape", "polyline", "polygon (fill), polyline (line), circle (dot)")
 	flag.StringVar(&cfg.style, "style", "decksh", "deck, decksh, plain")
+	flag.StringVar(&cfg.text, "text", "", "use text labels")
+	flag.Float64Var(&cfg.textsize, "textsize", 0.5, "textsize")
+	flag.StringVar(&cfg.textcolor, "textcolor", "black", "textcolor")
 	flag.StringVar(&cfg.bgcolor, "bgcolor", "white", "background color")
 	flag.BoolVar(&cfg.fulldeck, "fulldeck", false, "make a full deck")
 

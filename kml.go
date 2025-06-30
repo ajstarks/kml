@@ -26,6 +26,23 @@ type Geometry struct {
 	Longmin, Longmax float64
 }
 
+// locdata
+type Locdata struct {
+	X, Y []float64
+	Name []string
+}
+
+// xmlmap defines the XML substitutions
+var xmlmap = strings.NewReplacer(
+	"&", "&amp;",
+	"<", "&lt;",
+	">", "&gt;")
+
+// xmlesc escapes XML
+func xmlesc(s string) string {
+	return xmlmap.Replace(s)
+}
+
 // ParseCoords makes x, y slices from the string data contained in the kml coordinate element
 // (lat,long,elevation separated by commas, each coordinate separated by spaces)
 // The coordinates are mapped to a canvas bounding box in g.
@@ -73,6 +90,13 @@ func DumpCoords(x, y []float64) {
 // vmap maps one interval to another
 func vmap(value float64, low1 float64, high1 float64, low2 float64, high2 float64) float64 {
 	return low2 + (high2-low2)*(value-low1)/(high1-low1)
+}
+
+// mapData maps raw lat/long coordinates to canvas coordinates
+func mapData(x, y float64, g Geometry) (float64, float64) {
+	x = vmap(x, g.Longmin, g.Longmax, g.Xmin, g.Xmax)
+	y = vmap(y, g.Latmin, g.Latmax, g.Ymin, g.Ymax)
+	return x, y
 }
 
 // filter makes new coordinates contained within the boundary defined by g.
@@ -231,6 +255,44 @@ func Deckshape(shape, style string, x, y []float64, shapesize float64, color str
 		}
 	case "plain":
 		DumpCoords(x, y)
+	}
+}
+
+func deckText(align string, x, y []float64, names []string, size float64, color string) {
+	var xdiff, ydiff float64
+	switch align {
+	case "ctext":
+		align = "c"
+		ydiff = size
+	case "btext", "text":
+		xdiff = size / 3
+		ydiff = -size / 2
+		align = "l"
+	case "etext":
+		xdiff = -size / 3
+		ydiff = -size / 2
+		align = "e"
+	}
+	fill, op := colorop(color)
+	for i := 0; i < len(x); i++ {
+		fmt.Printf("<text align=\"%s\" xp=\"%.3f\" yp=\"%.3f\" sp=\"%.3f\" color=\"%s\" opacity=\"%s\">%s</text>\n",
+			align, x[i]+xdiff, y[i]+ydiff, size, fill, op, xmlesc(names[i]))
+	}
+}
+
+func deckshText(align string, x, y []float64, names []string, size float64, color string) {
+	fill, op := colorop(color)
+	for i := 0; i < len(x); i++ {
+		fmt.Printf("%s \"%s\" %.3f %.3f %.3f \"sans\" \"%s\" \"%s\"\n", align, names[i], x[i], y[i], size, fill, op)
+	}
+}
+
+func DeckText(align, style string, x, y []float64, names []string, size float64, color string) {
+	switch style {
+	case "deck":
+		deckText(align, x, y, names, size, color)
+	case "decksh":
+		deckshText(align, x, y, names, size, color)
 	}
 }
 
