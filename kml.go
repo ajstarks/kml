@@ -258,21 +258,29 @@ func Deckshape(shape, style string, x, y []float64, shapesize float64, color str
 	}
 }
 
-func deckText(align string, x, y []float64, names []string, size float64, color string) {
+func textadj(align string, size float64) (float64, float64) {
 	var xdiff, ydiff float64
 	switch align {
-	case "ctext":
+	case "c", "ctext":
 		align = "c"
-		ydiff = size
-	case "btext", "text":
+		ydiff = size / 2
+	case "b", "btext", "text":
 		xdiff = size / 3
 		ydiff = -size / 2
 		align = "l"
-	case "etext":
+	case "e", "etext":
 		xdiff = -size / 3
 		ydiff = -size / 2
 		align = "e"
+	default:
+		align = "c"
+		ydiff = size / 2
 	}
+	return xdiff, ydiff
+}
+
+func deckText(align string, x, y []float64, names []string, size float64, color string) {
+	xdiff, ydiff := textadj(align, size)
 	fill, op := colorop(color)
 	for i := 0; i < len(x); i++ {
 		fmt.Printf("<text align=\"%s\" xp=\"%.3f\" yp=\"%.3f\" sp=\"%.3f\" color=\"%s\" opacity=\"%s\">%s</text>\n",
@@ -281,9 +289,10 @@ func deckText(align string, x, y []float64, names []string, size float64, color 
 }
 
 func deckshText(align string, x, y []float64, names []string, size float64, color string) {
+	xdiff, ydiff := textadj(align, size)
 	fill, op := colorop(color)
 	for i := 0; i < len(x); i++ {
-		fmt.Printf("%s \"%s\" %.3f %.3f %.3f \"sans\" \"%s\" \"%s\"\n", align, names[i], x[i], y[i], size, fill, op)
+		fmt.Printf("%s \"%s\" %.3f %.3f %.3f \"sans\" \"%s\" \"%s\"\n", align, names[i], x[i]+xdiff, y[i]+ydiff, size, fill, op)
 	}
 }
 

@@ -14,9 +14,9 @@ import (
 
 // config: a bag of configuration options
 type config struct {
-	fulldeck, info, autobbox                            bool
-	shapesize, textsize                                 float64
-	textcolor, color, bbox, shape, bgcolor, style, text string
+	fulldeck, info, autobbox                                      bool
+	shapesize, textsize                                           float64
+	textcolor, color, bbox, shape, bgcolor, style, text, fieldsep string
 }
 
 // vmap maps one interval to another
@@ -59,12 +59,13 @@ func readData(r io.Reader) ([]float64, []float64, error) {
 }
 
 // readLoc reads lat/long pairs and an optional name (separated by white space) from a file
-func readLoc(r io.Reader) (kml.Locdata, error) {
+func readLoc(r io.Reader, sep byte) (kml.Locdata, error) {
 	var data kml.Locdata
 	s := bufio.NewScanner(r)
+	ff := func(c rune) bool { return c == rune(sep) }
 	for s.Scan() {
 		t := s.Text()
-		f := strings.Fields(t)
+		f := strings.FieldsFunc(t, ff)
 		if len(f) < 2 { // not enough fields
 			continue
 		}
@@ -125,7 +126,7 @@ func process(filename string, dest io.Writer, c config, mapgeo kml.Geometry) {
 	}
 	// read coordinates
 	//x, y, err := readData(r)
-	loc, err := readLoc(r)
+	loc, err := readLoc(r, c.fieldsep[0])
 	x := loc.X
 	y := loc.Y
 	if err != nil {
@@ -231,6 +232,7 @@ func main() {
 	flag.Float64Var(&cfg.textsize, "textsize", 0.5, "textsize")
 	flag.StringVar(&cfg.textcolor, "textcolor", "black", "textcolor")
 	flag.StringVar(&cfg.bgcolor, "bgcolor", "white", "background color")
+	flag.StringVar(&cfg.fieldsep, "fs", " ", "data field separator")
 	flag.BoolVar(&cfg.fulldeck, "fulldeck", false, "make a full deck")
 
 	flag.Parse()
